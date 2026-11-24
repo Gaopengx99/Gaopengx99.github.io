@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TingXie Project</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+Thai:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2ef;--card:#fff;--ink:#16211f;--mute:#5b6b67;--jade:#1f4d45;--jadeText:#fff;--line:#c9d5d0;--gold:#b8862b;--ok:#1f7a4d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101816;--card:#1a2724;--ink:#e8f0ed;--mute:#9db0aa;--jade:#6fc2ad;--jadeText:#0c1412;--line:#2e413c;--gold:#e0b04f;--ok:#6fd49c}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans Thai",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:4px 0 2px}
+.sub{color:var(--mute);margin:0 0 14px;font-size:.9rem}
+.zh{font-family:"Noto Serif SC","Songti SC","SimSun",serif}
+.tray{background:var(--card);border:2px solid var(--jade);border-radius:14px;padding:14px;min-height:178px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.slots{display:flex;gap:6px;flex-wrap:wrap;min-height:56px;align-items:center}
+.slot{font-size:2rem;background:var(--jade);color:var(--jadeText);border-radius:8px;padding:2px 10px;border:0;cursor:pointer}
+.empty{color:var(--mute);font-size:.95rem}
+.res{margin-top:8px}
+.py{font-size:1.5rem;font-weight:600;color:var(--jade)}
+.mean{font-size:1.05rem}
+.found{color:var(--ok);font-weight:600}
+.warn{color:var(--gold);font-size:.9rem}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+button{font:inherit}
+.act{background:var(--jade);color:var(--jadeText);border:0;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:600}
+.act.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 2px;cursor:pointer;color:var(--ink);text-align:center;line-height:1.2}
+.tile .c{font-size:1.9rem;display:block}
+.tile .p{font-size:.8rem;color:var(--jade);display:block}
+.tile .m{font-size:.7rem;color:var(--mute);display:block}
+.tile:active{background:var(--jade)}
+h2{font-size:1.05rem;margin:22px 0 8px}
+.words{display:flex;flex-wrap:wrap;gap:8px}
+.w{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:6px 12px;cursor:pointer}
+.w b{font-size:1.2rem;margin-right:6px}
+.w span{font-size:.8rem;color:var(--mute)}
+.note{color:var(--mute);font-size:.8rem;margin-top:18px}
+.speed-lbl{font-weight:600;color:var(--jade);font-variant-numeric:tabular-nums;width:44px;text-align:center;}
+</style>
+</head>
+<body>
+<main>
+<h1>TingXie Project</h1>
+<p class="sub">รวมคำศัพท์บทที่ 4–15 · สุ่มอ่านต่อเนื่อง · กดข้ามคำได้</p>
+
+<section class="tray" aria-live="polite">
+  <div class="slots" id="slots"></div>
+  <div class="res" id="res"></div>
+  <div class="row">
+    <button class="act" id="start">▶ เริ่มอ่านทั้งหมด</button>
+    <button class="act alt" id="next">⏭ สลับคำ</button>
+    
+    <!-- ปุ่มความเร็ว -->
+    <button class="act alt" id="speed-down" style="padding:9px 12px;" aria-label="ลดความเร็ว">🐢</button>
+    <span class="speed-lbl" id="speed-disp">0.75x</span>
+    <button class="act alt" id="speed-up" style="padding:9px 12px;" aria-label="เพิ่มความเร็ว">🐇</button>
+    
+    <button class="act alt" id="say">อ่าน</button>
+    <button class="act alt" id="back">ลบ</button>
+    <button class="act alt" id="clear">ล้าง</button>
+  </div>
+</section>
+
+<h2>ตัวอักษรทั้งหมด</h2>
+<div class="grid" id="grid"></div>
+
+<h2>คำศัพท์ทั้งหมด (บทที่ 4–15)</h2>
+<div class="words" id="words"></div>
+<p class="note">เสียงอ่านมาจากเบราว์เซอร์ของเครื่อง ถ้าไม่มีเสียง ให้ติดตั้งเสียงภาษาจีน (zh-CN) ในการตั้งค่าระบบ</p>
+</main>
+
+<script>
+var L={
+4:"日 rì วัน|快 kuài เร็ว|乐 lè สุข|接 jiē รับ|晚 wǎn ค่ำ|非 fēi ไม่ใช่|常 cháng บ่อย|始 shǐ เริ่ม|已 yǐ แล้ว|经 jīng ผ่าน|长 cháng ยาว|两 liǎng สอง|帮 bāng ช่วย|介 jiè คั่นกลาง|绍 shào สืบต่อ",
+5:"外 wài นอก|准 zhǔn แน่นอน|备 bèi เตรียม|就 jiù ก็|鱼 yú ปลา|件 jiàn ลักษณนาม|还 hái ยังคง|可 kě ได้|以 yǐ ใช้|错 cuò ผิด|考 kǎo สอบ|试 shì ลอง|意 yì ใจ|思 sī คิด|咖 kā กา|啡 fēi แฟ",
+6:"门 mén ประตู|自 zì ตนเอง|行 xíng ไปได้|羊 yáng แกะ|肉 ròu เนื้อ|条 tiáo ลักษณนาม|篮 lán ตะกร้า|因 yīn เพราะ|所 suǒ ที่|公 gōng สาธารณะ|斤 jīn ชั่ง",
+7:"教 jiào สอน|室 shì ห้อง|场 chǎng ลาน|路 lù ถนน|离 lí ห่างจาก|司 sī ดูแล|远 yuǎn ไกล|共 gòng รวม|汽 qì ไอ|慢 màn ช้า|过 guò ผ่าน|走 zǒu เดิน|到 dào ถึง",
+8:"让 ràng ให้|告 gào บอก|诉 sù บอก|等 děng รอ|找 zhǎo หา|事 shì เรื่อง|情 qíng อารมณ์|服 fú เสื้อผ้า|务 wù งาน|员 yuán พนักงาน|白 bái ขาว|黑 hēi ดำ|贵 guì แพง",
+9:"从 cóng จาก|舞 wǔ เต้นรำ|希 xī หวัง|望 wàng หวัง|题 tí โจทย์|迎 yíng ต้อนรับ|班 bān ชั้นเรียน|懂 dǒng เข้าใจ|完 wán เสร็จ",
+10:"课 kè บทเรียน|助 zhù ช่วย|别 bié อย่า|哥 gē พี่ชาย|鸡 jī ไก่|蛋 dàn ไข่|瓜 guā แตง|正 zhèng ตรง|洗 xǐ ล้าง",
+11:"唱 chàng ร้อง|歌 gē เพลง|男 nán ชาย|孩 hái เด็ก|右 yòu ขวา|比 bǐ เทียบ|便 pián ง่าย|宜 yí เหมาะ|姓 xìng นามสกุล",
+12:"妻 qī ภรรยา|雷 léi ฟ้าร้อง|零 líng ศูนย์|度 dù องศา|穿 chuān สวม|进 jìn เข้า|弟 dì น้องชาย|近 jìn ใกล้",
+13:"着 zhe อยู่|拿 ná ถือ|铅 qiān ตะกั่ว|笔 bǐ ปากกา|笑 xiào หัวเราะ|宾 bīn แขก|馆 guǎn อาคาร|直 zhí ตรง|往 wǎng ไปทาง",
+14:"但 dàn แต่|虽 suī แม้ว่า|然 rán เช่นนั้น|次 cì ครั้ง|玩 wán เล่น|晴 qíng ฟ้าใส|百 bǎi ร้อย",
+15:"票 piào ตั๋ว|火 huǒ ไฟ|站 zhàn สถานี|更 gèng ยิ่ง|妹 mèi น้องสาว|阴 yīn ครึ้ม"};
+var W="快乐|kuàilè|มีความสุข|非常|fēicháng|มาก|已经|yǐjīng|แล้ว|介绍|jièshào|แนะนำ|准备|zhǔnbèi|เตรียม|可以|kěyǐ|ได้ อนุญาต|考试|kǎoshì|การสอบ|意思|yìsi|ความหมาย|咖啡|kāfēi|กาแฟ|公斤|gōngjīn|กิโลกรัม|所以|suǒyǐ|ดังนั้น|教室|jiàoshì|ห้องเรียน|公司|gōngsī|บริษัท|告诉|gàosu|บอก|事情|shìqing|เรื่องราว|服务员|fúwùyuán|พนักงานบริการ|希望|xīwàng|ความหวัง|鸡蛋|jīdàn|ไข่ไก่|男孩|nánhái|เด็กชาย|便宜|piányi|ถูก|铅笔|qiānbǐ|ดินสอ|宾馆|bīnguǎn|โรงแรม|虽然|suīrán|แม้ว่า|零度|língdù|ศูนย์องศา|弟弟|dìdi|น้องชาย|哥哥|gēge|พี่ชาย|妹妹|mèimei|น้องสาว|羊肉|yángròu|เนื้อแกะ|走路|zǒulù|เดินทาง|慢走|mànzǒu|เดินดีๆ นะ|黑白|hēibái|ขาวดำ|唱歌|chànggē|ร้องเพลง|远近|yuǎnjìn|ไกลใกล้|日|rì|วัน".split("|");
+var D={},C={},lessonOf={};
+for(var i=0;i<W.length;i+=3)D[W[i]]={py:W[i+1],m:W[i+2]};
+Object.keys(L).forEach(function(n){L[n].split("|").forEach(function(s){var a=s.split(" ");C[a[0]]={py:a[1],m:a[2]};lessonOf[a[0]]=+n})});
+var cur=4,sel=[];
+var $=function(id){return document.getElementById(id)};
+
+var speechRate = 0.75; // ตัวแปรความเร็วเริ่มต้น
+
+function speak(t,cb){
+  try{
+    var s=window.speechSynthesis;if(!s){if(cb)setTimeout(cb,1500);return}
+    s.cancel();
+    var u=new SpeechSynthesisUtterance(t);
+    u.lang="zh-CN";
+    u.rate=speechRate; // ใช้ความเร็วจากตัวแปร
+    if(cb){var called=false;var finish=function(){if(called)return;called=true;cb();};u.onend=finish;u.onerror=finish;}
+    var v=s.getVoices().filter(function(x){return /zh[-_]CN|cmn|Chinese/i.test(x.lang+x.name)})[0];
+    if(v)u.voice=v;
+    s.speak(u);
+  }catch(e){}
+}
+
+function render(){
+  var s=$("slots");s.innerHTML="";
+  if(!sel.length){s.innerHTML='<span class="empty">ยังไม่ได้เลือกตัวอักษร แตะด้านล่างได้เลย</span>';$("res").innerHTML="";return}
+  sel.forEach(function(c,i){
+    var b=document.createElement("button");b.className="slot zh";b.textContent=c;b.setAttribute("aria-label","ลบ "+c);
+    b.onclick=function(){sel.splice(i,1);render()};s.appendChild(b);
+  });
+  var w=sel.join(""),d=D[w],py=d?d.py:sel.map(function(c){return C[c].py}).join(" ");
+  $("res").innerHTML='<div class="py">'+py+'</div>'+(d?'<div class="mean"><span class="found">เป็นคำศัพท์:</span> '+d.m+'</div>':
+    '<div class="warn">'+(sel.length>1?'ยังไม่อยู่ในรายการคำ แต่ยังอ่านออกเสียงได้':'ตัวเดียว: '+C[w].m)+'</div>');
+}
+
+var run=0,tok=0,playlist=[],playIndex=0;
+
+// ดึงคำทั้งหมด (รวมตัวอักษร 1 พยางค์จาก C และ 2 พยางค์จาก D)
+function allWords(){ return Object.keys(C).concat(Object.keys(D)); }
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function stopPlayback(){run=0;tok++;try{speechSynthesis.cancel()}catch(e){}$("start").textContent="▶ เล่นต่อ / เริ่มอ่านทั้งหมด";}
+function updatePlaybackLabel(){ $("start").textContent=run?"⏸ หยุด":"▶ เล่นต่อ / เริ่มอ่านทั้งหมด"; }
+function playCurrent(my){
+  if(!run||my!==tok)return;
+  if(playIndex>=playlist.length){run=0;tok++;$("start").textContent="✓ อ่านครบแล้ว · เริ่มใหม่";return;}
+  var k=playlist[playIndex];sel=k.split("");render();
+  var completed=false;
+  function done(){if(completed||my!==tok||!run)return;completed=true;setTimeout(function(){if(my!==tok||!run)return;playIndex++;playCurrent(my);},Math.round(1200/speechRate));}
+  speak(k,done);
+  setTimeout(done, Math.round(6500/speechRate));
+  updatePlaybackLabel();
+}
+
+$("start").onclick=function(){
+  if(run){stopPlayback();return;}
+  if(!playlist.length||playIndex>=playlist.length){playlist=shuffle(allWords().slice());playIndex=0;}
+  if(!playlist.length)return;
+  run=1;var my=++tok;playCurrent(my);
+};
+
+// แก้ลอจิกสลับคำให้ดึงคำใหม่ออกมาให้ถูกต้อง
+$("next").onclick=function(){
+  tok++;try{speechSynthesis.cancel()}catch(e){}
+  if(!playlist.length) {
+      playlist=shuffle(allWords().slice());
+      playIndex=0;
+  } else {
+      playIndex++;
+      if(playIndex>=playlist.length){
+          var previous=playlist[playlist.length-1];
+          playlist=shuffle(allWords().filter(function(w){return w!==previous;}));
+          if(previous)playlist.push(previous);
+          playIndex=0;
+      }
+  }
+  run=1;var my=++tok;playCurrent(my);
+};
+
+// ปุ่มควบคุมความเร็ว
+$("speed-up").onclick=function(){
+  if(speechRate<2.0){ speechRate+=0.25; }
+  $("speed-disp").textContent=speechRate.toFixed(2)+"x";
+};
+$("speed-down").onclick=function(){
+  if(speechRate>0.25){ speechRate-=0.25; }
+  $("speed-disp").textContent=speechRate.toFixed(2)+"x";
+};
+
+$("say").onclick=function(){if(sel.length)speak(sel.join(""))};
+$("back").onclick=function(){sel.pop();render()};
+$("clear").onclick=function(){sel=[];render()};
+if(window.speechSynthesis)speechSynthesis.getVoices();
+
+$("grid").innerHTML="";
+Object.keys(C).forEach(function(c){var a=C[c],b=document.createElement("button");b.className="tile";b.innerHTML='<span class="c zh">'+c+'</span><span class="p">'+a.py+'</span><span class="m">'+a.m+'</span>';b.onclick=function(){sel.push(c);render();speak(c)};$("grid").appendChild(b);});
+wordsAll();render();
+
+function wordsAll(){
+  $("words").innerHTML="";
+  Object.keys(D).forEach(function(k){var b=document.createElement("button");b.className="w";b.innerHTML='<b class="zh">'+k+'</b><span>'+D[k].py+' · '+D[k].m+'</span>';b.onclick=function(){sel=k.split("");render();speak(k)};$("words").appendChild(b);});
+}
+</script>
+</body>
+</html>
